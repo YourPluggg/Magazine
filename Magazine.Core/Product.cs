@@ -15,6 +15,7 @@ namespace Magazine.Core
         public double Price { get; set; }
         /*
          * Сделать потом добавление изображения карточки товара
+         * если прикручю фронтенд
         public void AddImages() { }
         */
 

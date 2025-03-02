@@ -2,18 +2,20 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using Magazine.Core;
 
 namespace Magazine.WebApi
 {
     public class ProductService : IProductService
     {
-        private const string PathProductsFile = "products.txt"; 
+        private readonly string PathProductsFile; 
         private List<Product> products;
     
         //Конструктор
-        public ProductService() {
-            products = LoadProducts(); 
+        public ProductService(IConfiguration cinfig) {
+            products = LoadProducts();
+            PathProductsFile = cinfig["DBPATH"];
         }
 
 
@@ -44,43 +46,44 @@ namespace Magazine.WebApi
         }
 
         /*
-         * Загрузка списка продуктов из файла 
-         * Будем работать пока без JSON 
-         * Данные об одном продукте хранятся в одной строке 
-         * Ожидаем что формат Id;Name;Definition;Price
+         * Ддя корректной сериализации создаём файл, в котором массив JSON объектов
          */
         private List<Product> LoadProducts() {
+            
             var products = new List<Product>();
 
             //Проверяем существует ли файл
             if (!File.Exists(PathProductsFile)) return products;
 
-            var lines = File.ReadAllLines(PathProductsFile);
-
-            foreach (var line in lines)
+            try
             {
-                var parts = line.Split(';');
-                if (parts.Length == 4)
-                { 
-                    /*
-                     * Так как у нас два значения как int и double надо преобразовать их из строки
-                     */
-                    if (int.TryParse(parts[0], out int id) && double.TryParse(parts[3], out double price)) {
-                        products.Add(new Product { 
-                            Id = id,
-                            Name = parts[1],
-                            Definition = parts[2],
-                            Price = price
-                        });
-                    }
-                }
+                //Сериализация файла
+                var json = File.ReadAllText(PathProductsFile);
+
+                //Десериализация списка продуктов
+                products = JsonConvert.DeserializeObject <List<Product>> (json);
             }
+            catch 
+            {
+                Console.WriteLine($"Ошибка загрузки продуктов!");
+            }
+            
             return products;
         }
 
         private void SaveProducts() {
-            var lines = products.Select(p => $"{p.Id};{p.Name};{p.Definition};{p.Price}").ToList();
-            File.WriteAllLines(PathProductsFile, lines);
+            try
+            {
+                //Сериализуем, только с отступами, чтобы соответствовать ожидаемому формату
+                var json = JsonConvert.SerializeObject(products, Formatting.Indented);
+
+                //Записываем JSON в файл
+                File.WriteAllText(PathProductsFile, json);
+            }
+            catch 
+            {
+                Console.WriteLine($"Ошибка сохранения продуктов!");
+            }
         }
     }
 }
