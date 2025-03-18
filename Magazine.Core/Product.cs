@@ -18,11 +18,12 @@ namespace Magazine.Core
          * если прикручю фронтенд
         public void AddImages() { }
         */
-
-
+        //Метод для удобного вывода из json
+        public override string ToString()
+        {
+            return $"ID: {Id}, Definition: {Definition}, Name: {Name}, Price: {Price}";
+        }
     }
-
-
-    
-
 }
+
+

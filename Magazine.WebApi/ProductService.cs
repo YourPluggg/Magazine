@@ -9,6 +9,119 @@ namespace Magazine.WebApi
 {
     public class ProductService : IProductService
     {
+        private readonly string PathProductsFile;
+        private List<Product> products;
+
+        public ProductService(IConfiguration config)
+        {
+            PathProductsFile = config["DBPATH"];
+            products = LoadProducts();
+        }
+
+        public Product Add(Product product)
+        {
+            try
+            {
+                product.Id = products.Any() ? products.Max(p => p.Id) + 1 : 1;
+                products.Add(product);
+                SaveProducts();
+                return product;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при добавлении продукта: {ex.Message}");
+                return null;
+            }
+        }
+
+        public Product Remove(int ID)
+        {
+            try
+            {
+                var product = products.FirstOrDefault(p => p.Id == ID);
+                if (product != null)
+                {
+                    products.Remove(product);
+                    SaveProducts();
+                }
+                return product;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при удалении продукта: {ex.Message}");
+                return null;
+            }
+        }
+
+        public Product Edit(Product product)
+        {
+            try
+            {
+                var existingProduct = products.FirstOrDefault(p => p.Id == product.Id);
+                if (existingProduct != null)
+                {
+                    existingProduct.Name = product.Name;
+                    existingProduct.Definition = product.Definition;
+                    existingProduct.Price = product.Price;
+                    SaveProducts();
+                }
+                return existingProduct;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при редактировании продукта: {ex.Message}");
+                return null;
+            }
+        }
+
+        public Product Search(int ID)
+        {
+            try
+            {
+                return products.FirstOrDefault(p => p.Id == ID);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при поиске продукта: {ex.Message}");
+                return null;
+            }
+        }
+
+        private List<Product> LoadProducts()
+        {
+            if (!File.Exists(PathProductsFile)) return new List<Product>();
+
+            try
+            {
+                var json = File.ReadAllText(PathProductsFile);
+                return JsonConvert.DeserializeObject<List<Product>>(json) ?? new List<Product>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка загрузки продуктов: {ex.Message}");
+                return new List<Product>();
+            }
+        }
+
+        private void SaveProducts()
+        {
+            try
+            {
+                var json = JsonConvert.SerializeObject(products, Formatting.Indented);
+                File.WriteAllText(PathProductsFile, json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка сохранения продуктов: {ex.Message}");
+            }
+        }
+    }
+}
+/*
+namespace Magazine.WebApi
+{
+    public class ProductService : IProductService
+    {
         private readonly string PathProductsFile; 
         private List<Product> products;
     
@@ -45,9 +158,9 @@ namespace Magazine.WebApi
             return products.FirstOrDefault(p => p.Id == ID);
         }
 
-        /*
-         * Ддя корректной сериализации создаём файл, в котором массив JSON объектов
-         */
+        
+        // Ддя корректной сериализации создаём файл, в котором массив JSON объектов
+         
         private List<Product> LoadProducts() {
             
             var products = new List<Product>();
@@ -86,4 +199,4 @@ namespace Magazine.WebApi
             }
         }
     }
-}
+}*/
