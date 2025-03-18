@@ -10,7 +10,7 @@ namespace Magazine.WebApi
     public class ProductService : IProductService
     {
         private readonly string PathProductsFile;
-        private List<Product> products;
+        private Dictionary<int, Product> products;
 
         public ProductService(IConfiguration config)
         {
@@ -22,8 +22,8 @@ namespace Magazine.WebApi
         {
             try
             {
-                product.Id = products.Any() ? products.Max(p => p.Id) + 1 : 1;
-                products.Add(product);
+                product.Id = products.Any() ? products.Keys.Max() + 1 : 1;
+                products[product.Id] = product; // Добавляем в словарь
                 SaveProducts();
                 return product;
             }
@@ -38,13 +38,12 @@ namespace Magazine.WebApi
         {
             try
             {
-                var product = products.FirstOrDefault(p => p.Id == ID);
-                if (product != null)
+                if (products.Remove(ID, out var product)) // Удаляем из словаря
                 {
-                    products.Remove(product);
                     SaveProducts();
+                    return product;
                 }
-                return product;
+                return null;
             }
             catch (Exception ex)
             {
@@ -57,15 +56,13 @@ namespace Magazine.WebApi
         {
             try
             {
-                var existingProduct = products.FirstOrDefault(p => p.Id == product.Id);
-                if (existingProduct != null)
+                if (products.ContainsKey(product.Id))
                 {
-                    existingProduct.Name = product.Name;
-                    existingProduct.Definition = product.Definition;
-                    existingProduct.Price = product.Price;
+                    products[product.Id] = product; // Обновляем словарь
                     SaveProducts();
+                    return product;
                 }
-                return existingProduct;
+                return null;
             }
             catch (Exception ex)
             {
@@ -78,7 +75,7 @@ namespace Magazine.WebApi
         {
             try
             {
-                return products.FirstOrDefault(p => p.Id == ID);
+                return products.TryGetValue(ID, out var product) ? product : null;
             }
             catch (Exception ex)
             {
@@ -87,19 +84,20 @@ namespace Magazine.WebApi
             }
         }
 
-        private List<Product> LoadProducts()
+        private Dictionary<int, Product> LoadProducts()
         {
-            if (!File.Exists(PathProductsFile)) return new List<Product>();
+            if (!File.Exists(PathProductsFile)) return new Dictionary<int, Product>();
 
             try
             {
                 var json = File.ReadAllText(PathProductsFile);
-                return JsonConvert.DeserializeObject<List<Product>>(json) ?? new List<Product>();
+                var productList = JsonConvert.DeserializeObject<List<Product>>(json) ?? new List<Product>();
+                return productList.ToDictionary(p => p.Id); // Преобразуем список в словарь
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка загрузки продуктов: {ex.Message}");
-                return new List<Product>();
+                return new Dictionary<int, Product>();
             }
         }
 
@@ -107,7 +105,7 @@ namespace Magazine.WebApi
         {
             try
             {
-                var json = JsonConvert.SerializeObject(products, Formatting.Indented);
+                var json = JsonConvert.SerializeObject(products.Values.ToList(), Formatting.Indented);
                 File.WriteAllText(PathProductsFile, json);
             }
             catch (Exception ex)
@@ -117,86 +115,3 @@ namespace Magazine.WebApi
         }
     }
 }
-/*
-namespace Magazine.WebApi
-{
-    public class ProductService : IProductService
-    {
-        private readonly string PathProductsFile; 
-        private List<Product> products;
-    
-        //Конструктор
-        public ProductService(IConfiguration cinfig) {
-            products = LoadProducts();
-            PathProductsFile = cinfig["DBPATH"];
-        }
-
-
-        public void Add(Product product) {
-            product.Id = products.Any() ? products.Max(p => p.Id) + 1 : 1;
-            products.Add(product);
-            SaveProducts();
-        }
-
-        public void Remove(int ID)
-        {
-            var product = products.FirstOrDefault(p => p.Id == ID); 
-            if (product != null)
-            {
-                products.Remove(product);
-                SaveProducts();
-            }
-        }
-
-        public void Edit(Product product)
-        {
-
-        }
-
-        public Product Search(int ID)
-        {
-            return products.FirstOrDefault(p => p.Id == ID);
-        }
-
-        
-        // Ддя корректной сериализации создаём файл, в котором массив JSON объектов
-         
-        private List<Product> LoadProducts() {
-            
-            var products = new List<Product>();
-
-            //Проверяем существует ли файл
-            if (!File.Exists(PathProductsFile)) return products;
-
-            try
-            {
-                //Сериализация файла
-                var json = File.ReadAllText(PathProductsFile);
-
-                //Десериализация списка продуктов
-                products = JsonConvert.DeserializeObject <List<Product>> (json);
-            }
-            catch 
-            {
-                Console.WriteLine($"Ошибка загрузки продуктов!");
-            }
-            
-            return products;
-        }
-
-        private void SaveProducts() {
-            try
-            {
-                //Сериализуем, только с отступами, чтобы соответствовать ожидаемому формату
-                var json = JsonConvert.SerializeObject(products, Formatting.Indented);
-
-                //Записываем JSON в файл
-                File.WriteAllText(PathProductsFile, json);
-            }
-            catch 
-            {
-                Console.WriteLine($"Ошибка сохранения продуктов!");
-            }
-        }
-    }
-}*/
