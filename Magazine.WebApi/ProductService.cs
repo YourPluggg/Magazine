@@ -84,6 +84,12 @@ namespace Magazine.WebApi
             }
         }
 
+        public List<Product> GetAll()
+        {
+            return products.Values.ToList();
+        }
+
+
         private Dictionary<int, Product> LoadProducts()
         {
             if (!File.Exists(PathProductsFile)) return new Dictionary<int, Product>();

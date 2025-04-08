@@ -1,12 +1,62 @@
 [
-  { "Id": 1, "Definition": "None", "Name": "Iphone 10", "Price": 10000 },
-  { "Id": 2, "Definition": "None", "Name": "Iphone 11", "Price": 13000 },
-  { "Id": 3, "Definition": "None", "Name": "Iphone 12", "Price": 15000 },
-  { "Id": 4, "Definition": "None", "Name": "Iphone 13", "Price": 17000 },
-  { "Id": 5, "Definition": "None", "Name": "Iphone 14", "Price": 20000 },
-  { "Id": 6, "Definition": "None", "Name": "Iphone 14 pro", "Price": 25000 },
-  { "Id": 7, "Definition": "None", "Name": "Iphone 14 pro max", "Price": 30000 },
-  { "Id": 8, "Definition": "None", "Name": "Iphone 15", "Price": 35000 },
-  { "Id": 9, "Definition": "None", "Name": "Iphone 15 pro", "Price": 40000 },
-  { "Id": 10, "Definition": "None", "Name": "Iphone 15 pro max", "Price": 45000 }
+  {
+    "Id": 1,
+    "Definition": "None",
+    "Name": "Iphone 10",
+    "Price": 10000.0
+  },
+  {
+    "Id": 2,
+    "Definition": "New",
+    "Name": "sTR",
+    "Price": 10.0
+  },
+  {
+    "Id": 3,
+    "Definition": "None",
+    "Name": "Iphone 12",
+    "Price": 15000.0
+  },
+  {
+    "Id": 4,
+    "Definition": "None",
+    "Name": "Iphone 13",
+    "Price": 17000.0
+  },
+  {
+    "Id": 5,
+    "Definition": "None",
+    "Name": "Iphone 14",
+    "Price": 20000.0
+  },
+  {
+    "Id": 6,
+    "Definition": "None",
+    "Name": "Iphone 14 pro",
+    "Price": 25000.0
+  },
+  {
+    "Id": 7,
+    "Definition": "None",
+    "Name": "Iphone 14 pro max",
+    "Price": 30000.0
+  },
+  {
+    "Id": 8,
+    "Definition": "None",
+    "Name": "Iphone 15",
+    "Price": 35000.0
+  },
+  {
+    "Id": 9,
+    "Definition": "None",
+    "Name": "Iphone 15 pro",
+    "Price": 40000.0
+  },
+  {
+    "Id": 10,
+    "Definition": "None",
+    "Name": "Iphone 15 pro max",
+    "Price": 45000.0
+  }
 ]

@@ -21,29 +21,43 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+//Поиск продукта по ID
+app.MapGet("/products/{id}", (int id, IProductService service) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    var product = service.Search(id);
+    return product is not null ? Results.Ok(product) : Results.NotFound();
+});
 
-app.MapGet("/weatherforecast", (IProductService service) =>
+//Выводим все продукты
+app.MapGet("/products", (IProductService service) =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+    var allProducts = service.GetAll();
+    return Results.Ok(allProducts);
+});
 
+//Добавляем продукт в список
+//Добавить проверку на ID
+app.MapPost("/products", (Product product, IProductService service) => 
+{
+    var newProduct = service.Add(product);
+    return Results.Created($"/products/{newProduct.Id}" ,newProduct);
+});
+
+//Удаление продукта
+app.MapDelete("/products/{id}", (int id, IProductService service) =>
+{
+    var removed = service.Remove(id);
+    return removed is not null ? Results.Ok(removed) : Results.NotFound();
+});
+
+//Редактированиек
+app.MapPut("/products/{id}", (int id, Product product, IProductService service) =>
+{
+    if (id != product.Id) return Results.BadRequest("ID mismatch");
+    var edited = service.Edit(product);
+    return edited is not null ? Results.Ok(edited) : Results.NotFound();
+});
+
+//Запуск свегера
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

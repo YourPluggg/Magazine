@@ -9,10 +9,13 @@ namespace Magazine.Core
 {
     public interface IProductService
     {
-        Product Add(Product product);  // Теперь метод возвращает Product
+        Product Add(Product product);  
         Product Remove(int ID);
         Product Edit(Product product);
         Product Search(int ID);
+        //Все товары
+        List<Product> GetAll();
+
     }
 }
 
